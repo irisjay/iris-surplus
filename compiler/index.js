@@ -69,7 +69,7 @@ var rx = {
     refProp: /^ref\d*$/,
     fnProp: /^fn\d*$/,
     styleProp: /^style$/,
-    badStaticProp: /^(ref\d*|fn\d*|style)$/
+    badStaticProp: /^(ref\d*|fn\d*)$/
 };
 var parens = {
     "(": ")",
