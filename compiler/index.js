@@ -71,6 +71,9 @@ var rx = {
     styleProp: /^style$/,
     badStaticProp: /^(ref\d*|fn\d*)$/
 };
+var knownNamespaces = {
+    xlink: "http://www.w3.org/1999/xlink"
+};
 var parens = {
     "(": ")",
     "[": "]",
@@ -1131,9 +1134,18 @@ var codeGen = function (ctl, opts) {
                 functions.forEach(function (f) { return buildNodeFn(f, id_1); });
             }
         }, buildProperty = function (id, prop, expr, svg) {
-            return svg || IsAttribute(prop)
-                ? "Surplus.setAttribute(" + id + ", " + codeStr(prop) + ", " + expr + ");"
-                : id + "." + prop + " = " + expr + ";";
+            return prop.startsWith(':') ?
+                    "Surplus.setAttribute(" + id + ", " + codeStr(prop.slice(':'.length)) + ", " + expr + ");"
+                : prop.indexOf(':') !== -1 ? (
+                    knownNamespaces[prop.slice(0, prop.indexOf(':'))] ?
+                        "Surplus.setAttributeNS(" + id + ", " + codeStr(knownNamespaces[prop.slice(0, prop.indexOf(':'))]) + ", " + codeStr(prop.slice(prop.indexOf(':') + 1)) + ", " + expr + ");"
+                    :
+                        "Surplus.setAttribute(" + id + ", " + codeStr(prop) + ", " + expr + ");"
+                )
+                : svg || IsAttribute(prop) ?
+                    "Surplus.setAttribute(" + id + ", " + codeStr(prop) + ", " + expr + ");"
+                :
+                    id + "." + prop + " = " + expr + ";";
         }, buildSpread = function (id, expr, svg) {
             return "Surplus.spread(" + id + ", " + expr + ", " + svg + ");";
         }, buildNodeFn = function (node, id) {
